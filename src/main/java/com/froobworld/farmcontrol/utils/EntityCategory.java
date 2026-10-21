@@ -39,6 +39,13 @@ public class EntityCategory {
                 )
         );
 
+        entityCategories.add(new EntityCategory("category:unemployed-villager-without-home", false, Villager.class) {
+            @Override
+            public boolean isMember(SnapshotEntity entity) {
+                return super.isMember(entity) && entity.isUnemployedWithoutHome();
+            }
+        });
+
         entityCategoryMap = new HashMap<>();
         entityCategories.forEach(entityCategory -> entityCategoryMap.put(entityCategory.name, entityCategory));
     }

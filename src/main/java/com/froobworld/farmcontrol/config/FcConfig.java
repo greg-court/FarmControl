@@ -26,6 +26,9 @@ public class FcConfig extends NabConfiguration {
         );
     }
 
+    @Entry(key = "wolf-taming-limit")
+    public final ConfigEntry<Integer> wolfTamingLimit = ConfigEntries.integerEntry();
+
     @Entry(key = "cycle-period")
     public final ConfigEntry<Long> cyclePeriod = ConfigEntries.longEntry();
 

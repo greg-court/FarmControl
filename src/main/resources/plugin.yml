@@ -4,7 +4,7 @@ main: com.froobworld.farmcontrol.FarmControl
 api-version: 1.15
 authors: [froobynooby]
 description: A farm limiter and governor.
-folia-supported: true
+folia-supported: false
 
 commands:
   farmcontrol:
