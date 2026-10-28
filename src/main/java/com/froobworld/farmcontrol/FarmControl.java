@@ -56,9 +56,9 @@ public class FarmControl extends JavaPlugin {
         farmController.register();
 
         try {
-            new WolfTamingLimit(this);
+            new FollowerPetTamingLimit(this);
         } catch (Exception exception) {
-            getLogger().log(java.util.logging.Level.SEVERE, "Cannot initialise wolf ownership census", exception);
+            getLogger().log(java.util.logging.Level.SEVERE, "Cannot initialise follower-pet ownership census", exception);
             Bukkit.getPluginManager().disablePlugin(this);
             return;
         }
