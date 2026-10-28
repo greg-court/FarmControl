@@ -2,9 +2,8 @@
 
 Based on upstream 1.3.0 commit
 `728efcfae298706f804ad08f2d90d5fd02f6b7e4`, including its world-retention fix.
-Release 1.3.0-semianarchy.1 retains the tested dev.3 runtime code; only the build
-identification and this documentation change. MIT licence and upstream credit
-remain unchanged.
+Release 1.3.0-semianarchy.2 extends the existing owner wolf-taming limit to cats
+and parrots. The villager changes, MIT licence and upstream credit remain unchanged.
 
 ## Villager selector
 
@@ -29,28 +28,33 @@ this behaviour on 22 October 2026 and approved queuing the unchanged rule.
 Flowing-water safety, actual iron output and full-stack human pushing were not
 established by that trial; they are not represented as passed.
 
-## Wolf taming
+## Follower-pet taming
 
-`wolf-taming-limit: 10` prevents additional taming once an owner UUID has ten
-recorded wolves, including unloaded ones. Existing wolves are never edited or
-deleted; breeding is deliberately unrestricted. Puppies count against later
-taming, so this is not a hard ten-dog population cap. Native additions, successful
-tames, deaths and permanent removals update `plugins/FarmControl/wolf-owners.yml`.
-Writes use an atomic same-directory replacement. No permissions bypass the limit.
+`follower-pet-taming-limit: 10` prevents additional taming once an owner UUID has
+ten recorded wolves, cats and parrots combined, including unloaded pets. Existing
+pets are never edited or deleted; breeding is deliberately unrestricted. Offspring
+count against later taming, so this is not a hard population cap. Native additions,
+successful tames, deaths and permanent removals update
+`plugins/FarmControl/wolf-owners.yml` (the installed filename is retained for
+in-place upgrades). Writes use an atomic same-directory
+replacement. No permissions bypass the limit.
 
 An enabled limit refuses startup without a complete ownership census. The
 homelab Ansible role installs a stopped-world reader and invokes it through the
 normal systemd `ExecStartPre` lifecycle on every start. It scans saved entity
-regions, including passengers, without changing world data. Rebuilding at every
+regions, including passengers, and saved shoulder parrots in player data without
+changing world data. Rebuilding at every
 start reconciles crashes against Minecraft's saved world; no second scheduler or
 chunk loading is involved. This build is Paper-only, not Folia compatible.
-Other plugins' ownership edits to already-loaded wolves reconcile when those
-wolves next enter a world. The census is not a transaction with entity saves.
+Other plugins' ownership edits to already-loaded follower pets reconcile when
+those pets next enter a world. The census is not a transaction with entity saves.
 
-The trial verified native bone interactions for the tenth/eleventh dog,
-independent owners, cancelled tames, death freeing a slot, unloaded pets and
-restart retention. It did not establish a native puppy birth; there is no
-breeding-cancellation handler.
+On the Leaf 26.3 production clone, automated Bukkit event checks passed the
+tenth/eleventh tame for each covered type against a mixed-pet baseline and death
+freeing a slot. A connected test client received the shared cap message. Native
+bone and fish interactions also passed; the parrot interaction test client was
+unreliable, so that result is limited to the actual Bukkit tame event. Breeding
+is unchanged; there is no breeding-cancellation handler.
 
 ## Build and recovery
 

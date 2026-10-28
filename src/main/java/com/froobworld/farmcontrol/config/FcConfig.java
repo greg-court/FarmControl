@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Objects;
 
 public class FcConfig extends NabConfiguration {
-    private static final int CURRENT_VERSION = 9;
+    private static final int CURRENT_VERSION = 10;
 
     public FcConfig(FarmControl farmControl) {
         super(
@@ -26,8 +26,8 @@ public class FcConfig extends NabConfiguration {
         );
     }
 
-    @Entry(key = "wolf-taming-limit")
-    public final ConfigEntry<Integer> wolfTamingLimit = ConfigEntries.integerEntry();
+    @Entry(key = "follower-pet-taming-limit")
+    public final ConfigEntry<Integer> followerPetTamingLimit = ConfigEntries.integerEntry();
 
     @Entry(key = "cycle-period")
     public final ConfigEntry<Long> cyclePeriod = ConfigEntries.longEntry();

@@ -1,11 +1,12 @@
-# Maximum owned wolves before further taming is blocked; existing wolves and breeding stay unchanged.
-wolf-taming-limit: 10
+# Maximum owned follower pets (wolves, cats and parrots) before further taming is blocked.
+# Existing pets and breeding stay unchanged.
+follower-pet-taming-limit: 10
 
 # Configuration for FarmControl.
 # GitHub: https://github.com/froobynooby/FarmControl
 
 # Please don't change this!
-version: 9
+version: 10
 
 # Every how many ticks should we run the profile check / action cycle?
 cycle-period: 600
