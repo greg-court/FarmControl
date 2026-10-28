@@ -50,8 +50,11 @@ Other plugins' ownership edits to already-loaded follower pets reconcile when
 those pets next enter a world. The census is not a transaction with entity saves.
 
 On the Leaf 26.3 production clone, automated Bukkit event checks passed the
-tenth/eleventh tame for each covered type against a mixed-pet baseline and death
-freeing a slot. A connected test client received the shared cap message. Native
+tenth/eleventh tame for each covered type against a mixed-pet baseline, death
+freeing a slot and independent owners. A connected test client received the shared
+cap message for all three types. The shoulder-pickup event retained ownership;
+rebuilding from the clone's saved entity/player data retained the shoulder parrot.
+Native
 bone and fish interactions also passed; the parrot interaction test client was
 unreliable, so that result is limited to the actual Bukkit tame event. Breeding
 is unchanged; there is no breeding-cancellation handler.
