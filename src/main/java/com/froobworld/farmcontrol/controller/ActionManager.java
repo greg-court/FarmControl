@@ -3,6 +3,7 @@ package com.froobworld.farmcontrol.controller;
 import com.froobworld.farmcontrol.FarmControl;
 import com.froobworld.farmcontrol.controller.action.*;
 import com.froobworld.farmcontrol.controller.breeding.BreedingBlocker;
+import org.bukkit.entity.Silverfish;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -18,6 +19,10 @@ public class ActionManager {
         addAction(new RemoveAction());
         addAction(new RemoveAiAction());
         addAction(new RemoveAwarenessAction());
+        // Separate undo settings keep crowded silverfish paused through farm damage.
+        addAction(new RemoveAwarenessAction("pause-silverfish", Silverfish.class));
+        addAction(new SilverfishProtectionAction("prevent-drowning"));
+        addAction(new SilverfishProtectionAction("push-off-campfires"));
         addAction(new DisableBreedingAction(new BreedingBlocker(farmControl)));
         if (farmControl.getHookManager().getNmsHooks().getMobGoalNmsHook() != null) {
             addAction(new RemoveRandomMovementAction(farmControl.getHookManager().getNmsHooks().getMobGoalNmsHook()));
