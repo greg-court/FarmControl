@@ -25,7 +25,7 @@ The homelab policy assigns all three above 15 silverfish (count 16), linked at
 distance 10, and keeps its independent 1,000 population limit. Each action can
 instead be assigned by a separate profile with its own threshold. Native group
 checks, exclusions, action tracking, unload cleanup and recovery are reused;
-there is no extra scan, timer or mutable state store. Leaving a qualifying group
+there is no extra periodic scan, timer or mutable state store. Leaving a qualifying group
 restores awareness and removes the protections at a subsequent cycle. New mobs
 remain normal until a cycle assigns actions. These profiles are opt-in; the
 upstream default configuration does not enable them.
@@ -38,6 +38,15 @@ restored unless FarmControl owns `disable-collisions`. Previously unloaded fish
 recover when their chunks load. Other unmarked unaware mobs are left alone;
 world files do not need an offline rewrite. Normal group policy then applies.
 This migration remains available for old chunks and does not force-load them.
+
+On the 17 November Leaf 26.3-24 hourly-snapshot clone, live checks passed the
+15/16 boundary, ten-block chaining across separate enclosures, split and count
+recovery, scoped drowning damage, campfire damage/escape, falling and water
+transport. A 1,024-fish group was trimmed to 1,000 healthy survivors. Native reload
+retained the expected policy. Loaded and previously unloaded legacy-tagged fish
+recovered; an unmarked unaware control stayed unchanged. Monster activation was
+temporarily disabled in this playerless lab so physics advanced. This is not a
+player-kill XP retest, a farm-throughput guarantee or a matched performance test.
 
 ## Villager selector
 
