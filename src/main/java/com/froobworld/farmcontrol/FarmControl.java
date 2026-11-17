@@ -55,6 +55,8 @@ public class FarmControl extends JavaPlugin {
         farmController.load();
         farmController.register();
 
+        new SilverfishProtection(this);
+
         try {
             new FollowerPetTamingLimit(this);
         } catch (Exception exception) {

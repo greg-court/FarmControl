@@ -2,8 +2,42 @@
 
 Based on upstream 1.3.0 commit
 `728efcfae298706f804ad08f2d90d5fd02f6b7e4`, including its world-retention fix.
-Release 1.3.0-semianarchy.2 extends the existing owner wolf-taming limit to cats
-and parrots. The villager changes, MIT licence and upstream credit remain unchanged.
+Release 1.3.0-semianarchy.3 adds group-scoped silverfish actions and recovery of
+FrozenSilverfish-owned state. The existing villager selector and follower-pet
+taming limit remain unchanged. The MIT licence and upstream credit remain.
+
+## Crowded silverfish
+
+Three optional native profile actions replace the dedicated FrozenSilverfish
+plugin:
+
+- `pause-silverfish` uses `Mob#setAware(false)`, retaining normal physics and
+  collisions. Its separate action name inherits native default undo settings
+  (`damage`, `interact` and `target` false), so repeated farm damage does not
+  wake the crowd or change the existing villager `remove-awareness` settings.
+- `prevent-drowning` cancels drowning damage only while the silverfish has this
+  action assigned.
+- `push-off-campfires` gives unaware, actioned silverfish the same 0.3 horizontal /
+  0.2 vertical escape impulse as FrozenSilverfish 1.1.1 when campfire damage occurs.
+  Campfire damage itself is not cancelled. Attribution is in THIRD-PARTY-NOTICES.
+
+The homelab policy assigns all three above 15 silverfish (count 16), linked at
+distance 10, and keeps its independent 1,000 population limit. Each action can
+instead be assigned by a separate profile with its own threshold. Native group
+checks, exclusions, action tracking, unload cleanup and recovery are reused;
+there is no extra scan, timer or mutable state store. Leaving a qualifying group
+restores awareness and removes the protections at a subsequent cycle. New mobs
+remain normal until a cycle assigns actions. These profiles are opt-in; the
+upstream default configuration does not enable them.
+
+Remove FrozenSilverfish when installing this build. On startup and entity entry,
+the replacement recognises its `frozen_silverfish` tag and restores only that
+legacy awareness state, unless FarmControl already owns `pause-silverfish`.
+Its `frozensilverfish:collisions_off` marker is also cleared and collisions
+restored unless FarmControl owns `disable-collisions`. Previously unloaded fish
+recover when their chunks load. Other unmarked unaware mobs are left alone;
+world files do not need an offline rewrite. Normal group policy then applies.
+This migration remains available for old chunks and does not force-load them.
 
 ## Villager selector
 
