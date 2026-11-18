@@ -31,6 +31,8 @@ public final class FollowerPetTamingLimit implements Listener {
     private final FarmControl plugin;
     private final File file;
     private final Map<UUID, UUID> owners = new HashMap<>();
+    // Count in-flight successful candidates atomically across independent region threads.
+    private final Map<UUID, UUID> reservations = new HashMap<>();
 
     public FollowerPetTamingLimit(FarmControl plugin) throws Exception {
         this.plugin = plugin;
@@ -49,9 +51,10 @@ public final class FollowerPetTamingLimit implements Listener {
         // A newly installed census must be seeded from the stopped world's entity
         // files. Loaded pets reconcile thereafter without loading extra chunks.
         for (var world : Bukkit.getWorlds()) {
-            for (Wolf wolf : world.getEntitiesByClass(Wolf.class)) reconcile(wolf);
-            for (Cat cat : world.getEntitiesByClass(Cat.class)) reconcile(cat);
-            for (Parrot parrot : world.getEntitiesByClass(Parrot.class)) reconcile(parrot);
+            plugin.getHookManager().getEntityGetterHook().getEntities(world, Wolf.class, Cat.class, Parrot.class)
+                    .thenAccept(entities -> entities.forEach(entity ->
+                            plugin.getHookManager().getSchedulerHook().runEntityTask(
+                                    () -> reconcile(entity), null, entity)));
         }
         save();
         Bukkit.getPluginManager().registerEvents(this, plugin);
@@ -60,22 +63,29 @@ public final class FollowerPetTamingLimit implements Listener {
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
-    public void limitTaming(EntityTameEvent event) {
+    public synchronized void limitTaming(EntityTameEvent event) {
         if (!isFollowerPet(event.getEntity()) || !(event.getOwner() instanceof Player player)) return;
         int limit = plugin.getFcConfig().followerPetTamingLimit.get();
         if (limit <= 0) return;
-        long count = owners.values().stream().filter(player.getUniqueId()::equals).count();
+        UUID owner = player.getUniqueId();
+        long count = owners.values().stream().filter(owner::equals).count()
+                + reservations.values().stream().filter(owner::equals).count();
         if (count >= limit) {
             event.setCancelled(true);
             player.sendMessage("You have reached the " + limit
                     + "-pet taming limit for dogs, cats and parrots.");
+        } else {
+            reservations.put(event.getEntity().getUniqueId(), owner);
         }
     }
 
-    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-    public void recordTaming(EntityTameEvent event) {
-        if (isFollowerPet(event.getEntity())) {
-            setOwner(event.getEntity().getUniqueId(), event.getOwner().getUniqueId());
+    @EventHandler(priority = EventPriority.MONITOR)
+    public synchronized void recordTaming(EntityTameEvent event) {
+        UUID pet = event.getEntity().getUniqueId();
+        reservations.remove(pet);
+        // A later listener may cancel the tame: release its reservation without recording it.
+        if (!event.isCancelled() && isFollowerPet(event.getEntity())) {
+            setOwner(pet, event.getOwner().getUniqueId());
         }
     }
 
@@ -85,12 +95,12 @@ public final class FollowerPetTamingLimit implements Listener {
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-    public void died(EntityDeathEvent event) {
+    public synchronized void died(EntityDeathEvent event) {
         if (isFollowerPet(event.getEntity()) && owners.remove(event.getEntity().getUniqueId()) != null) save();
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
-    public void removed(EntityRemoveEvent event) {
+    public synchronized void removed(EntityRemoveEvent event) {
         if (isFollowerPet(event.getEntity()) && event.getCause() != EntityRemoveEvent.Cause.UNLOAD
                 // A shoulder parrot still belongs to its owner; it is stored with the player.
                 && event.getCause() != EntityRemoveEvent.Cause.PICKUP
@@ -107,12 +117,12 @@ public final class FollowerPetTamingLimit implements Listener {
         setOwner(entity.getUniqueId(), owner);
     }
 
-    private void setOwner(UUID pet, UUID owner) {
+    private synchronized void setOwner(UUID pet, UUID owner) {
         UUID previous = owner == null ? owners.remove(pet) : owners.put(pet, owner);
         if (!java.util.Objects.equals(previous, owner)) save();
     }
 
-    private void save() {
+    private synchronized void save() {
         var data = new YamlConfiguration();
         owners.forEach((pet, owner) -> data.set(pet.toString(), owner.toString()));
         try {
