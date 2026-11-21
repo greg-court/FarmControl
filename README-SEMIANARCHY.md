@@ -6,6 +6,14 @@ Release 1.3.0-semianarchy.3 adds group-scoped silverfish actions and recovery of
 FrozenSilverfish-owned state. The existing villager selector and follower-pet
 taming limit remain unchanged. The MIT licence and upstream credit remain.
 
+## Newest-first trimming
+
+Release 1.3.0-semianarchy.4 lets a profile set `group.preserve-variants: false`.
+This orders eligible excess mobs by age across variants such as sheep colours
+or villager professions. Profiles with the setting omitted keep the usual
+variant-preserving order. Group membership, exclusions and scheduling retain
+their existing behaviour.
+
 ## Crowded silverfish
 
 Three optional native profile actions replace the dedicated FrozenSilverfish

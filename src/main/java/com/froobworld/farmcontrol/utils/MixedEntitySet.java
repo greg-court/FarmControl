@@ -7,17 +7,23 @@ import java.util.*;
 
 public class MixedEntitySet implements Iterable<SnapshotEntity> {
     private final Comparator<SnapshotEntity> comparator;
+    private final boolean preserveVariants;
     private final Set<SnapshotEntity> unclassifiedEntities;
     private final Map<Object, MixedEntitySet> classifiedEntityMap = new HashMap<>();
 
     public MixedEntitySet(Comparator<SnapshotEntity> comparator) {
+        this(comparator, true);
+    }
+
+    public MixedEntitySet(Comparator<SnapshotEntity> comparator, boolean preserveVariants) {
         // if equal, resolve by comparing the entity ID
         this.comparator = comparator.thenComparingInt(SnapshotEntity::getEntityId);
+        this.preserveVariants = preserveVariants;
         unclassifiedEntities = new TreeSet<>(this.comparator);
     }
 
     public boolean add(SnapshotEntity entity) {
-        return add(entity, entity.getClassifications().iterator());
+        return add(entity, classifications(entity));
     }
 
     private boolean add(SnapshotEntity entity, Iterator<Object> classificationIterator) {
@@ -29,7 +35,7 @@ public class MixedEntitySet implements Iterable<SnapshotEntity> {
     }
 
     public boolean remove(SnapshotEntity entity) {
-        return remove(entity, entity.getClassifications().iterator());
+        return remove(entity, classifications(entity));
     }
 
     private boolean remove(SnapshotEntity entity, Iterator<Object> classificationIterator) {
@@ -39,6 +45,10 @@ public class MixedEntitySet implements Iterable<SnapshotEntity> {
             MixedEntitySet subSet = classifiedEntityMap.get(classificationIterator.next());
             return subSet != null && subSet.remove(entity, classificationIterator);
         }
+    }
+
+    private Iterator<Object> classifications(SnapshotEntity entity) {
+        return preserveVariants ? entity.getClassifications().iterator() : Collections.emptyIterator();
     }
 
     public int size() {
