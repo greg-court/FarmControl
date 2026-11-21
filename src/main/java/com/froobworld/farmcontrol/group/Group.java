@@ -8,10 +8,11 @@ import java.util.Comparator;
 
 public class Group {
     private final GroupDefinition definition;
-    private final MixedEntitySet members = new MixedEntitySet(Comparator.comparingLong(SnapshotEntity::getTicksLived)); // youngest removed first
+    private final MixedEntitySet members;
 
     public Group(GroupDefinition definition, Collection<SnapshotEntity> members) {
         this.definition = definition;
+        this.members = new MixedEntitySet(Comparator.comparingLong(SnapshotEntity::getTicksLived), definition.shouldPreserveVariants());
         members.forEach(this.members::add);
     }
 

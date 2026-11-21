@@ -20,8 +20,13 @@ public class GroupDefinition {
     private final boolean sameChunk;
     private final boolean ignoreVerticalDistance;
     private final boolean pure;
+    private final boolean preserveVariants;
 
     public GroupDefinition(Set<EntityCategory> memberCategories, Set<EntityCategory> excludedCategories, int size, double distance, boolean sameChunk, boolean ignoreVerticalDistance, boolean pure) {
+        this(memberCategories, excludedCategories, size, distance, sameChunk, ignoreVerticalDistance, pure, true);
+    }
+
+    private GroupDefinition(Set<EntityCategory> memberCategories, Set<EntityCategory> excludedCategories, int size, double distance, boolean sameChunk, boolean ignoreVerticalDistance, boolean pure, boolean preserveVariants) {
         this.memberCategories = memberCategories;
         this.excludedCategories = excludedCategories;
         this.size = size;
@@ -30,6 +35,7 @@ public class GroupDefinition {
         this.sameChunk = sameChunk;
         this.ignoreVerticalDistance = ignoreVerticalDistance;
         this.pure = pure;
+        this.preserveVariants = preserveVariants;
         this.typePredicate = memberCategories.stream()
                 .map(EntityCategory::asSnapshotEntityPredicate)
                 .reduce(Predicate::or)
@@ -80,6 +86,10 @@ public class GroupDefinition {
         return pure;
     }
 
+    public boolean shouldPreserveVariants() {
+        return preserveVariants;
+    }
+
     public static GroupDefinition fromConfigurationSection(FarmControl farmControl, String profileName, ConfigurationSection section) {
         Set<EntityCategory> memberCategories = new HashSet<>();
         for (String entityType : section.getStringList("types")) {
@@ -104,8 +114,9 @@ public class GroupDefinition {
         double distance = sameChunk ? 0 : section.getDouble("distance");
         boolean ignoreVerticalDistance = section.getBoolean("ignore-vertical-distance");
         boolean pure = section.getBoolean("pure");
+        boolean preserveVariants = section.getBoolean("preserve-variants", true);
 
-        return new GroupDefinition(memberCategories, excludedCategories, size, distance, sameChunk, ignoreVerticalDistance, pure);
+        return new GroupDefinition(memberCategories, excludedCategories, size, distance, sameChunk, ignoreVerticalDistance, pure, preserveVariants);
     }
 
 }
