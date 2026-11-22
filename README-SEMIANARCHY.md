@@ -58,18 +58,17 @@ player-kill XP retest, a farm-throughput guarantee or a matched performance test
 
 ## Villager selector
 
-`category:unemployed-villager-without-home` snapshots profession `NONE` and the
-absence of `MemoryKey.HOME` through Bukkit's public API. It filters before native
-grouping: employed villagers, nitwits and bed-linked villagers neither count nor
-connect groups. Normal FarmControl action ownership, scheduling and undo remain.
-No collision, scoreboard-team, NoAI or breeding-control code is changed.
+`category:unemployed-villager-without-home` selects jobless villagers without
+a claimed bed or a directly adjacent workstation. It checks the villager's block
+and six face neighbours for all vanilla workstations, including filled cauldrons.
+The existing category key is retained. Filtering happens before grouping, so
+exempt villagers neither count nor link separate groups. The scan uses the
+existing snapshot cycle and only reads blocks in loaded, owned chunks.
 
-The owner's policy uses count 10, native distance 2 and `remove-awareness` only.
-The homelab configuration owns the check interval. Neighbour chaining compares block positions on each
-axis, ignores walls and has no maximum overall group span. Moving a villager
-outside the group restores awareness on a subsequent check. Paused villagers
-need to wake before claiming new jobs or beds. Upstream exclusions and undo on
-interaction, damage or targeting remain enabled.
+Homelab uses this for the crowded holding-pen awareness rule. Adding a workstation
+beside a paused villager lets it wake on a subsequent check and claim a profession
+through vanilla AI. Named and other native exclusions and event-based undo remain.
+FarmControl does not change breeding or collision rules as part of this exemption.
 
 The isolated trial passed 9/10 thresholds, filtering before grouping, wall
 chaining, position/profession/valid-bed recovery, native reload and clean restart.
