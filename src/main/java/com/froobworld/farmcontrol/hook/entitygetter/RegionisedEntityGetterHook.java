@@ -58,12 +58,14 @@ public class RegionisedEntityGetterHook implements EntityGetterHook {
 
     @Override
     public CompletableFuture<List<SnapshotEntity>> getSnapshotEntities(World world, Class<?>... classes) {
-        return getMappedEntities(world, SnapshotEntity::new, classes).thenApply(ArrayList::new);
+        int workstationDistance = farmControl.getFcConfig().villagerWorkstationDistance.get();
+        return getMappedEntities(world, entity -> new SnapshotEntity(entity, workstationDistance), classes)
+                .thenApply(ArrayList::new);
     }
 
     @Override
     public CompletableFuture<List<SnapshotEntity>> getSnapshotEntities(World world) {
-        return getMappedEntities(world, SnapshotEntity::new).thenApply(ArrayList::new);
+        return getSnapshotEntities(world, new Class<?>[0]);
     }
 
     public static boolean isCompatible() {
