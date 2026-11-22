@@ -59,9 +59,11 @@ player-kill XP retest, a farm-throughput guarantee or a matched performance test
 ## Villager selector
 
 `category:unemployed-villager-without-home` selects jobless villagers without
-a claimed bed or a directly adjacent workstation. It checks the villager's block
-and six face neighbours for all vanilla workstations, including filled cauldrons.
-The existing category key is retained. Filtering happens before grouping, so
+a claimed bed or a nearby workstation. The check covers all vanilla workstations,
+including filled cauldrons. Set `villager-workstation-distance` in `config.yml`
+to 1 (default) or 2, then run `/farmcontrol reload`. Distance counts steps
+between blocks sharing a face. The existing category key is retained. Filtering
+happens before grouping, so
 exempt villagers neither count nor link separate groups. The scan uses the
 existing snapshot cycle and only reads blocks in loaded, owned chunks.
 

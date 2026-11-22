@@ -8,7 +8,6 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Tag;
 import org.bukkit.World;
-import org.bukkit.block.BlockFace;
 import org.bukkit.entity.*;
 import org.bukkit.entity.memory.MemoryKey;
 import org.bukkit.material.Colorable;
@@ -21,10 +20,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class SnapshotEntity {
     private static final AtomicBoolean useWoodType = new AtomicBoolean(false);
     private static final boolean REGIONISED = RegionisedSchedulerHook.isCompatible();
-    private static final BlockFace[] WORKSTATION_NEIGHBOURS = {
-            BlockFace.SELF, BlockFace.NORTH, BlockFace.SOUTH, BlockFace.WEST,
-            BlockFace.EAST, BlockFace.UP, BlockFace.DOWN
-    };
 
     private final Entity entity;
     private final int entityId;
@@ -41,7 +36,7 @@ public class SnapshotEntity {
     private final boolean unemployedWithoutHomeOrWorkstation;
     private final List<Object> classifications = new ArrayList<>();
 
-    public SnapshotEntity(Entity entity) {
+    public SnapshotEntity(Entity entity, int workstationDistance) {
         this.entity = entity;
         this.entityId = entity.getEntityId();
         Location at = entity.getLocation();
@@ -58,7 +53,7 @@ public class SnapshotEntity {
         this.unemployedWithoutHomeOrWorkstation = entity instanceof Villager villager
                 && villager.getProfession() == Villager.Profession.NONE
                 && villager.getMemory(MemoryKey.HOME) == null
-                && !hasNearbyWorkstation(at);
+                && !hasNearbyWorkstation(at, workstationDistance);
         classifications.add(entity.getType());
         if (entity instanceof Colorable) {
             DyeColor colour = ((Colorable) entity).getColor();
@@ -88,24 +83,27 @@ public class SnapshotEntity {
         }
     }
 
-    private static boolean hasNearbyWorkstation(Location at) {
+    private static boolean hasNearbyWorkstation(Location at, int distance) {
         World world = at.getWorld();
         int x = at.getBlockX();
         int y = at.getBlockY();
         int z = at.getBlockZ();
-        for (BlockFace face : WORKSTATION_NEIGHBOURS) {
-            int blockX = x + face.getModX();
-            int blockZ = z + face.getModZ();
-            int chunkX = blockX >> 4;
-            int chunkZ = blockZ >> 4;
-            if ((chunkX != x >> 4 || chunkZ != z >> 4)
-                    && (!world.isChunkLoaded(chunkX, chunkZ)
-                    || (REGIONISED && !Bukkit.isOwnedByCurrentRegion(world, chunkX, chunkZ)))) {
-                continue;
-            }
-            Material type = world.getBlockAt(blockX, y + face.getModY(), blockZ).getType();
-            if (isWorkstation(type)) {
-                return true;
+        for (int dx = -distance; dx <= distance; dx++) {
+            int zRange = distance - Math.abs(dx);
+            int chunkX = (x + dx) >> 4;
+            for (int dz = -zRange; dz <= zRange; dz++) {
+                int chunkZ = (z + dz) >> 4;
+                if ((chunkX != (x >> 4) || chunkZ != (z >> 4))
+                        && (!world.isChunkLoaded(chunkX, chunkZ)
+                        || (REGIONISED && !Bukkit.isOwnedByCurrentRegion(world, chunkX, chunkZ)))) {
+                    continue;
+                }
+                int yRange = zRange - Math.abs(dz);
+                for (int dy = -yRange; dy <= yRange; dy++) {
+                    if (isWorkstation(world.getBlockAt(x + dx, y + dy, z + dz).getType())) {
+                        return true;
+                    }
+                }
             }
         }
         return false;

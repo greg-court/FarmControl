@@ -29,6 +29,14 @@ public class FcConfig extends NabConfiguration {
     @Entry(key = "follower-pet-taming-limit")
     public final ConfigEntry<Integer> followerPetTamingLimit = ConfigEntries.integerEntry();
 
+    @Entry(key = "villager-workstation-distance")
+    public final ConfigEntry<Integer> villagerWorkstationDistance = new ConfigEntry<>(value -> {
+        if (value instanceof Integer distance && (distance == 1 || distance == 2)) {
+            return distance;
+        }
+        throw new IllegalArgumentException("villager-workstation-distance must be 1 or 2");
+    });
+
     @Entry(key = "cycle-period")
     public final ConfigEntry<Long> cyclePeriod = ConfigEntries.longEntry();
 

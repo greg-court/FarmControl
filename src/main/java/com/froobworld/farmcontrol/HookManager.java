@@ -40,7 +40,7 @@ public class HookManager {
         if (RegionisedEntityGetterHook.isCompatible()) {
             entityGetterHook = new RegionisedEntityGetterHook(farmControl);
         } else {
-            entityGetterHook = new BukkitEntityGetterHook();
+            entityGetterHook = new BukkitEntityGetterHook(farmControl);
         }
         if (tickHook != null) {
             tickHook.register(farmControl);

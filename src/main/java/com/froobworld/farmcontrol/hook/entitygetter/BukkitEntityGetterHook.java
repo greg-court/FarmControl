@@ -1,7 +1,7 @@
 package com.froobworld.farmcontrol.hook.entitygetter;
 
 import com.froobworld.farmcontrol.controller.entity.SnapshotEntity;
-import org.bukkit.Bukkit;
+import com.froobworld.farmcontrol.FarmControl;
 import org.bukkit.World;
 import org.bukkit.entity.Entity;
 
@@ -11,6 +11,12 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 public class BukkitEntityGetterHook implements EntityGetterHook {
+    private final FarmControl farmControl;
+
+    public BukkitEntityGetterHook(FarmControl farmControl) {
+        this.farmControl = farmControl;
+    }
+
     @Override
     public CompletableFuture<Collection<Entity>> getEntities(World world, Class<?>... classes) {
         return CompletableFuture.completedFuture(world.getEntitiesByClasses(classes));
@@ -23,19 +29,20 @@ public class BukkitEntityGetterHook implements EntityGetterHook {
 
     @Override
     public CompletableFuture<List<SnapshotEntity>> getSnapshotEntities(World world, Class<?>... classes) {
-        List<SnapshotEntity> snapshotEntities = new ArrayList<>();
-        for (Entity entity : world.getEntitiesByClasses(classes)) {
-            snapshotEntities.add(new SnapshotEntity(entity));
-        }
-        return CompletableFuture.completedFuture(snapshotEntities);
+        return CompletableFuture.completedFuture(snapshotEntities(world.getEntitiesByClasses(classes)));
     }
 
     @Override
     public CompletableFuture<List<SnapshotEntity>> getSnapshotEntities(World world) {
-        List<SnapshotEntity> snapshotEntities = new ArrayList<>();
-        for (Entity entity : world.getEntities()) {
-            snapshotEntities.add(new SnapshotEntity(entity));
+        return CompletableFuture.completedFuture(snapshotEntities(world.getEntities()));
+    }
+
+    private List<SnapshotEntity> snapshotEntities(Collection<Entity> entities) {
+        int workstationDistance = farmControl.getFcConfig().villagerWorkstationDistance.get();
+        List<SnapshotEntity> snapshots = new ArrayList<>(entities.size());
+        for (Entity entity : entities) {
+            snapshots.add(new SnapshotEntity(entity, workstationDistance));
         }
-        return CompletableFuture.completedFuture(snapshotEntities);
+        return snapshots;
     }
 }
