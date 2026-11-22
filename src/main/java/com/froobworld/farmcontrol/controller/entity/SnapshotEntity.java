@@ -1,7 +1,14 @@
 package com.froobworld.farmcontrol.controller.entity;
 
 import com.froobworld.farmcontrol.data.FcData;
+import com.froobworld.farmcontrol.hook.scheduler.RegionisedSchedulerHook;
+import org.bukkit.Bukkit;
 import org.bukkit.DyeColor;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.Tag;
+import org.bukkit.World;
+import org.bukkit.block.BlockFace;
 import org.bukkit.entity.*;
 import org.bukkit.entity.memory.MemoryKey;
 import org.bukkit.material.Colorable;
@@ -13,6 +20,12 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class SnapshotEntity {
     private static final AtomicBoolean useWoodType = new AtomicBoolean(false);
+    private static final boolean REGIONISED = RegionisedSchedulerHook.isCompatible();
+    private static final BlockFace[] WORKSTATION_NEIGHBOURS = {
+            BlockFace.SELF, BlockFace.NORTH, BlockFace.SOUTH, BlockFace.WEST,
+            BlockFace.EAST, BlockFace.UP, BlockFace.DOWN
+    };
+
     private final Entity entity;
     private final int entityId;
     private final Vector location;
@@ -25,13 +38,14 @@ public class SnapshotEntity {
     private final int ticksLived;
     private final boolean pickupable;
     private final boolean mounted;
-    private final boolean unemployedWithoutHome;
+    private final boolean unemployedWithoutHomeOrWorkstation;
     private final List<Object> classifications = new ArrayList<>();
 
     public SnapshotEntity(Entity entity) {
         this.entity = entity;
         this.entityId = entity.getEntityId();
-        this.location = entity.getLocation().toVector();
+        Location at = entity.getLocation();
+        this.location = at.toVector();
         this.fcData = FcData.get(entity);
         this.leashed = entity instanceof Mob && ((Mob) entity).isLeashed();
         this.loveMode = entity instanceof Animals && ((Animals) entity).isLoveMode();
@@ -41,9 +55,10 @@ public class SnapshotEntity {
         this.pickupable = entity instanceof AbstractArrow && ((AbstractArrow) entity).getPickupStatus() == AbstractArrow.PickupStatus.ALLOWED;
         this.ticksLived = entity.getTicksLived();
         this.mounted = !entity.getPassengers().isEmpty();
-        this.unemployedWithoutHome = entity instanceof Villager villager
+        this.unemployedWithoutHomeOrWorkstation = entity instanceof Villager villager
                 && villager.getProfession() == Villager.Profession.NONE
-                && villager.getMemory(MemoryKey.HOME) == null;
+                && villager.getMemory(MemoryKey.HOME) == null
+                && !hasNearbyWorkstation(at);
         classifications.add(entity.getType());
         if (entity instanceof Colorable) {
             DyeColor colour = ((Colorable) entity).getColor();
@@ -71,6 +86,38 @@ public class SnapshotEntity {
                 classifications.add(((Boat) entity).getWoodType());
             }
         }
+    }
+
+    private static boolean hasNearbyWorkstation(Location at) {
+        World world = at.getWorld();
+        int x = at.getBlockX();
+        int y = at.getBlockY();
+        int z = at.getBlockZ();
+        for (BlockFace face : WORKSTATION_NEIGHBOURS) {
+            int blockX = x + face.getModX();
+            int blockZ = z + face.getModZ();
+            int chunkX = blockX >> 4;
+            int chunkZ = blockZ >> 4;
+            if ((chunkX != x >> 4 || chunkZ != z >> 4)
+                    && (!world.isChunkLoaded(chunkX, chunkZ)
+                    || (REGIONISED && !Bukkit.isOwnedByCurrentRegion(world, chunkX, chunkZ)))) {
+                continue;
+            }
+            Material type = world.getBlockAt(blockX, y + face.getModY(), blockZ).getType();
+            if (isWorkstation(type)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static boolean isWorkstation(Material type) {
+        return switch (type) {
+            case BARREL, BLAST_FURNACE, BREWING_STAND, CARTOGRAPHY_TABLE, COMPOSTER,
+                    FLETCHING_TABLE, GRINDSTONE, LECTERN, LOOM, SMITHING_TABLE,
+                    SMOKER, STONECUTTER -> true;
+            default -> Tag.CAULDRONS.isTagged(type);
+        };
     }
 
     public Class<? extends Entity> getEntityClass() {
@@ -129,8 +176,8 @@ public class SnapshotEntity {
         return mounted;
     }
 
-    public boolean isUnemployedWithoutHome() {
-        return unemployedWithoutHome;
+    public boolean isUnemployedWithoutHomeOrWorkstation() {
+        return unemployedWithoutHomeOrWorkstation;
     }
 
     public int getTicksLived() {

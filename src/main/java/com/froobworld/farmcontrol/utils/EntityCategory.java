@@ -42,7 +42,7 @@ public class EntityCategory {
         entityCategories.add(new EntityCategory("category:unemployed-villager-without-home", false, Villager.class) {
             @Override
             public boolean isMember(SnapshotEntity entity) {
-                return super.isMember(entity) && entity.isUnemployedWithoutHome();
+                return super.isMember(entity) && entity.isUnemployedWithoutHomeOrWorkstation();
             }
         });
 
