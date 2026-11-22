@@ -31,6 +31,9 @@ public class FcConfig extends NabConfiguration {
 
     @Entry(key = "villager-workstation-distance")
     public final ConfigEntry<Integer> villagerWorkstationDistance = new ConfigEntry<>(value -> {
+        if (value == null) {
+            return 1;
+        }
         if (value instanceof Integer distance && (distance == 1 || distance == 2)) {
             return distance;
         }
