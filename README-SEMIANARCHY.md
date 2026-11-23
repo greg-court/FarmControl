@@ -3,8 +3,8 @@
 Based on upstream 1.3.0 commit
 `728efcfae298706f804ad08f2d90d5fd02f6b7e4`, including its world-retention fix.
 Release 1.3.0-semianarchy.3 adds group-scoped silverfish actions and recovery of
-FrozenSilverfish-owned state. The existing villager selector and follower-pet
-taming limit remain unchanged. The MIT licence and upstream credit remain.
+FrozenSilverfish-owned state. Release 1.3.0-semianarchy.7 restores vanilla
+pet taming on Paper and Folia.
 
 ## Newest-first trimming
 
@@ -79,37 +79,6 @@ took drowning damage; the active comparison stayed healthy. The owner accepted
 this behaviour on 22 October 2026 and approved queuing the unchanged rule.
 Flowing-water safety, actual iron output and full-stack human pushing were not
 established by that trial; they are not represented as passed.
-
-## Follower-pet taming
-
-`follower-pet-taming-limit: 10` prevents additional taming once an owner UUID has
-ten recorded wolves, cats and parrots combined, including unloaded pets. Existing
-pets are never edited or deleted; breeding is deliberately unrestricted. Offspring
-count against later taming, so this is not a hard population cap. Native additions,
-successful tames, deaths and permanent removals update
-`plugins/FarmControl/wolf-owners.yml` (the installed filename is retained for
-in-place upgrades). Writes use an atomic same-directory
-replacement. No permissions bypass the limit.
-
-An enabled limit refuses startup without a complete ownership census. The
-homelab Ansible role installs a stopped-world reader and invokes it through the
-normal systemd `ExecStartPre` lifecycle on every start. It scans saved entity
-regions, including passengers, and saved shoulder parrots in player data without
-changing world data. Rebuilding at every
-start reconciles crashes against Minecraft's saved world; no second scheduler or
-chunk loading is involved. This build is Paper-only, not Folia compatible.
-Other plugins' ownership edits to already-loaded follower pets reconcile when
-those pets next enter a world. The census is not a transaction with entity saves.
-
-On the Leaf 26.3 production clone, automated Bukkit event checks passed the
-tenth/eleventh tame for each covered type against a mixed-pet baseline, death
-freeing a slot and independent owners. A connected test client received the shared
-cap message for all three types. The shoulder-pickup event retained ownership;
-rebuilding from the clone's saved entity/player data retained the shoulder parrot.
-Native
-bone and fish interactions also passed; the parrot interaction test client was
-unreliable, so that result is limited to the actual Bukkit tame event. Breeding
-is unchanged; there is no breeding-cancellation handler.
 
 ## Build and recovery
 

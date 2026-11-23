@@ -26,9 +26,6 @@ public class FcConfig extends NabConfiguration {
         );
     }
 
-    @Entry(key = "follower-pet-taming-limit")
-    public final ConfigEntry<Integer> followerPetTamingLimit = ConfigEntries.integerEntry();
-
     @Entry(key = "villager-workstation-distance")
     public final ConfigEntry<Integer> villagerWorkstationDistance = new ConfigEntry<>(value -> {
         if (value == null) {

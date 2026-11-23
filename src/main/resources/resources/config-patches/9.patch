@@ -1,3 +1,1 @@
-[move]
-from=wolf-taming-limit
-to=follower-pet-taming-limit
+# Version 10 retired the old field migration when vanilla pet taming was restored.
