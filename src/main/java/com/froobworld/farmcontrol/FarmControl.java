@@ -57,14 +57,6 @@ public class FarmControl extends JavaPlugin {
 
         new SilverfishProtection(this);
 
-        try {
-            new FollowerPetTamingLimit(this);
-        } catch (Exception exception) {
-            getLogger().log(java.util.logging.Level.SEVERE, "Cannot initialise follower-pet ownership census", exception);
-            Bukkit.getPluginManager().disablePlugin(this);
-            return;
-        }
-
         registerCommands();
 
         new FcMetrics(this, 9692);
