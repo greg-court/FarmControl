@@ -24,6 +24,7 @@ public class ActionManager {
         addAction(new SilverfishProtectionAction("prevent-drowning"));
         addAction(new SilverfishProtectionAction("push-off-campfires"));
         addAction(new DisableBreedingAction(new BreedingBlocker(farmControl)));
+        CanvasAllayAction.register(this);
         if (farmControl.getHookManager().getNmsHooks().getMobGoalNmsHook() != null) {
             addAction(new RemoveRandomMovementAction(farmControl.getHookManager().getNmsHooks().getMobGoalNmsHook()));
         } else {
